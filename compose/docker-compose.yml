@@ -38,13 +38,6 @@ services:
       DOZZLE_FILTER: "status=running"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-
-  it-tools:
-    image: corentinth/it-tools:latest
-    container_name: it-tools
-    restart: unless-stopped
-    ports:
-      - '${IT_TOOLS_PORT}:80'
   watchtower:
     image: containrrr/watchtower
     container_name: watchtower
