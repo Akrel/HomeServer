@@ -1,0 +1,35 @@
+version: '3.8'
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    restart: always
+    environment:
+      - DB_TYPE=${DB_TYPE}
+      - DB_POSTGRESDB_HOST=${DB_HOST}
+      - DB_POSTGRESDB_PORT=${DB_PORT}
+      - DB_POSTGRESDB_DATABASE=${DB_NAME}
+      - DB_POSTGRESDB_USER=${DB_USER}
+      - DB_POSTGRESDB_PASSWORD=${DB_PASS}
+      - N8N_SECURE_COOKIE=${N8N_SECURE_COOKIE:-false}
+      - N8N_WEBHOOK_TUNNEL_URL=${WEBHOOK_URL}
+      - N8N_HOST=${N8N_HOST}
+    ports:
+      - 5678:5678
+    volumes:
+      - n8n_storage:/home/node/.n8n
+    networks:
+      compose_databases_network:
+      network_default:
+      n8n_net:
+        ipv4_address: ${WEBHOOK_IP}
+
+volumes:
+  n8n_storage:
+
+networks:
+  n8n_net:
+    external: true
+  compose_databases_network:
+    external: true
+  network_default:
+    external: true
