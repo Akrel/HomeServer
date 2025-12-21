@@ -1,0 +1,67 @@
+version: '3.9'
+services:
+  homeassistant:
+    container_name: homeassistant
+    image: "ghcr.io/home-assistant/home-assistant:stable"
+    depends_on:
+      - mosquitto
+      - nodered
+    volumes:
+      - ha_conf:/config
+      - /etc/localtime:/etc/localtime:ro #mapowanie do kontenera, czas RO- read only
+      - /run/dbus:/run/dbus:ro
+    restart: unless-stopped
+    devices:
+      - /dev/hci0:/dev/hci0
+    ports:
+      - ${HA_PORT}:8123
+    privileged: true
+    network_mode: host
+
+  mosquitto:
+    image: eclipse-mosquitto
+    container_name: mosquitto
+    volumes:
+      - mosquitto_conf:/mosquitto/config
+      - mosquitto_log:/mosquitto/log
+    ports:
+      - ${MOS_PORT}:1883
+      - ${MOS_UI_PORT}:9001
+    restart: always
+
+  nodered:
+    image: nodered/node-red:latest
+    container_name: nodered
+    depends_on:
+      - mosquitto
+    environment:
+      - TZ=Europe/London
+    ports:
+      - ${NOD_PORT}:1880
+    volumes:
+      - nodered_data:/data
+    restart: always
+
+  esphome:
+    container_name: esphome
+    image: ghcr.io/esphome/esphome
+    volumes:
+      - esp_config:/config
+      - /etc/localtime:/etc/localtime:ro
+    restart: always
+    privileged: true
+    network_mode: host
+    devices:
+      - /dev/ttyUSB0:/dev/ttyUSB0
+    environment:
+      - USERNAME=${ESP_USER}
+      - PASSWORD=${ESP_PASSWORD}
+    stdin_open: true
+    tty: true
+
+volumes:
+  ha_conf:
+  mosquitto_conf:
+  nodered_data:
+  esp_config:
+  mosquitto_log:
