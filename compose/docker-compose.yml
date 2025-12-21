@@ -20,4 +20,4 @@ volumes:
   postgres_db:
     name: ${POSTGRES_DB_VOL}
 networks:
-  ${DB_NETWORK_NAME}:
+  databases_network:
