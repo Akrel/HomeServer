@@ -33,6 +33,17 @@ services:
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+  dozzle:
+    image: amir20/dozzle:latest
+    container_name: dozzle
+    restart: unless-stopped
+    ports:
+      - ${DOZZLE_PORT}:8080
+    environment:
+      DOZZLE_LEVEL: info
+      DOZZLE_FILTER: "status=running"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
 volumes:
   postgres_db:
     name: ${POSTGRES_DB_VOL}
