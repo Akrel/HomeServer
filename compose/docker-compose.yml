@@ -4,10 +4,14 @@ services:
     image: postgres:latest
     container_name: Postgres
     restart: always
-    network_mode: "host"  # <--- ZMIANA KLUCZOWA
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    networks:
+      databases_network:
+        ipv4_address: ${POSTGRES_IPV4}
+    ports:
+      - '${POSTGRES_PORT}:5432'
     volumes:
       - postgres_db:/var/lib/postgresql/data
 
