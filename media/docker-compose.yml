@@ -1,0 +1,151 @@
+version: "3.9"
+services:
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    restart: unless-stopped
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - WEBUI_PORT=${QBIT_WEBUI_PORT}
+    volumes:
+      - ${QBITTORRENT_CONFIG}:/config
+      - ${MOVIES_DIR}:/downloads/movies
+      - ${TORRENT_DOWNLOADS_VOL}:/downloads
+    ports:
+      - ${QBIT_WEBUI_PORT}:${QBIT_WEBUI_PORT}
+      - ${QBIT_PORT}:${QBIT_PORT}
+      - ${QBIT_PORT}:${QBIT_PORT}/udp
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    restart: unless-stopped
+    networks:
+      - ${NETWORK_NAME}
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    ports:
+      - ${RADARR_PORT}:7878
+    volumes:
+      - ${RADARR_CONFIG}:/config
+      - ${MOVIES_DIR}:/downloads/movies
+
+  sonarr:
+    image: linuxserver/sonarr:latest
+    restart: unless-stopped
+    container_name: sonarr
+    networks:
+      - ${NETWORK_NAME}
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${SONARR_CONFIG}:/config
+      - ${SERIES_DIR}:/downloads/series
+    ports:
+      - ${SONARR_PORT}:8989
+
+  prowlarr:
+    image: linuxserver/prowlarr:latest
+    restart: unless-stopped
+    container_name: prowlarr
+    networks:
+      - ${NETWORK_NAME}
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${PROWLARR_CONFIG}:/config
+    ports:
+      - ${PROWLARR_PORT}:9696
+
+  jellyfin:
+    image: linuxserver/jellyfin:latest
+    restart: unless-stopped
+    container_name: jellyfin
+    networks:
+      - ${NETWORK_NAME}
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${JELLYFIN_CONFIG}:/config
+      - ${MOVIES_DIR}:/data/movies
+    ports:
+      - ${JELLYFIN_HTTP_PORT}:8096
+      - ${JELLYFIN_DISCOVERY_PORT}:7359/udp
+      - ${JELLYFIN_HTTPS_PORT}:8920
+
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    networks:
+      - ${NETWORK_NAME}
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${JELLYSEERR_CONFIG}:/app/config
+      - ${MOVIES_DIR}:/downloads/movies
+    ports:
+      - ${JELLYSEERR_PORT}:5055
+    restart: unless-stopped
+
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    networks:
+      - ${NETWORK_NAME}
+    environment:
+      - TZ=Europe/Warsaw
+    ports:
+      - ${FLARESOLVERR_PORT}:8191
+    restart: unless-stopped
+
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    networks:
+      - ${NETWORK_NAME}
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${BAZARR_CONFIG}:/config
+      - ${MOVIES_DIR}:/movies
+      - ${SERIES_DIR}:/series
+    ports:
+      - ${BAZARR_PORT}:6767
+    restart: unless-stopped
+
+volumes:
+  torrent-downloads:
+    name: ${TORRENT_DOWNLOADS_VOL}
+  radarr-config:
+    name: ${RADARR_CONFIG}
+  sonarr-config:
+    name: ${SONARR_CONFIG}
+  prowlarr-config:
+    name: ${PROWLARR_CONFIG}
+  jellyfin-config:
+    name: ${JELLYFIN_CONFIG}
+  qbittorrent-config:
+    name: ${QBITTORRENT_CONFIG}
+  jellyseerr-config:
+    name: ${JELLYSEERR_CONFIG}
+  bazar-config:
+    name: ${BAZARR_CONFIG}
+
+networks:
+  mynetwork:
+    name: ${NETWORK_NAME}
+    external: true
