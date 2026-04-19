@@ -22,10 +22,43 @@ services:
       network_default:
       n8n_net:
         ipv4_address: ${WEBHOOK_IP}
+    openclaw-gateway:
+      image: openclaw/core:latest
+      container_name: openclaw-gateway
+      environment:
+        - OPENCLAW_GATEWAY_TOKEN=SuperTajneHaslo2026!
+        # Konfiguracja pod OpenRouter
+        - OPENROUTER_API_KEY= ""
+        - OPENAI_BASE_URL=https://openrouter.ai/api/v1
+        - TZ=Europe/Warsaw
+      volumes:
+        - ./data:/home/node/.openclaw
+        - ./workspace:/home/node/.openclaw/workspace
+      ports:
+        - "18789:18789"
+      restart: unless-stopped
+      networks:
+        n8n_net:
+    openclaw-cli:
+      image: openclaw/core:latest
+      container_name: openclaw-cli
+      network_mode: "service:openclaw-gateway"
+      stdin_open: true
+      tty: true
+      environment:
+        - OPENCLAW_GATEWAY_TOKEN=SuperTajneHaslo2026!
+      volumes:
+        - ./data:/home/node/.openclaw
+      entrypoint: [ "node", "dist/index.js" ]
+      depends_on:
+        - openclaw-gateway
+      networks:
+        n8n_net:
 
 volumes:
   n8n_storage:
-
+  openclaw-gateway:
+  openclaw-cli:
 networks:
   n8n_net:
     external: true

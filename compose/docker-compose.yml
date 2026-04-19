@@ -1,7 +1,7 @@
 version: '3.9'
 services:
   postgres_db:
-    image: postgres:latest
+    image: postgres:16-alpine
     container_name: Postgres
     restart: always
     environment:
@@ -27,12 +27,7 @@ services:
       - ${HEIMDALL_HTTPS_PORT}:443
     volumes:
       - heimdall_config:/config
-  watchtower:
-    image: containrrr/watchtower
-    container_name: watchtower
-    restart: unless-stopped
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+
   dozzle:
     image: amir20/dozzle:latest
     container_name: dozzle
